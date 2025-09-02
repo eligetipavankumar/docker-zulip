@@ -15,36 +15,36 @@ spec:
     spec:
       containers:
         - name: zulip
-          image: eligetipavankumar/zulipapp:latest
-          imagePullPolicy: Always
+          image: eligetipavankumar/zulipapp:latest 
           ports:
             - containerPort: 80
             - containerPort: 443
           env:
             - name: DB_HOST
-              value: "postgres"
+              value: postgres
             - name: DB_HOST_PORT
               value: "5432"
             - name: DB_USER
-              value: "zulip"
+              value: zulip
             - name: SECRETS_postgres_password
-              value: "zulip-pass"
+              value: zulip-pass
             - name: SETTING_MEMCACHED_LOCATION
-              value: "memcached:11211"
+              value: memcached:11211
             - name: SETTING_RABBITMQ_HOST
-              value: "rabbitmq"
+              value: rabbitmq
             - name: SECRETS_rabbitmq_password
-              value: "zulip-rabbit-pass"
+              value: zulip-rabbit-pass
             - name: SETTING_REDIS_HOST
-              value: "redis"
+              value: redis
             - name: SECRETS_redis_password
-              value: "zulip-redis-pass"
+              value: zulip-redis-pass
             - name: SECRETS_secret_key
-              value: "supersecretkey"
+              value: supersecretkey
             - name: SETTING_EXTERNAL_HOST
-              value: "zulip.local"
+              value: zulip.local
             - name: SETTING_ZULIP_ADMINISTRATOR
-              value: "admin@example.com"
+              value: admin@example.com
+
 ---
 apiVersion: v1
 kind: Service
