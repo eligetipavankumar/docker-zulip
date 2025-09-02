@@ -2,10 +2,10 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY = "docker.io"                // Docker Hub registry
+        REGISTRY = "docker.io"
         IMAGE_NAME = "eligetipavankumar/zulipapp"
         IMAGE_TAG = "latest"
-        KUBECONFIG = "$HOME/.kube/config"     // Minikube kubeconfig
+        KUBECONFIG = "$HOME/.kube/config"   // Jenkins must have access to Minikube kubeconfig
     }
 
     stages {
@@ -39,12 +39,20 @@ pipeline {
             steps {
                 script {
                     sh '''
+                        echo "Applying Kubernetes manifests..."
                         kubectl apply -f k8s/namespace.yaml
                         kubectl apply -f k8s/postgres.yaml
                         kubectl apply -f k8s/memcached.yaml
                         kubectl apply -f k8s/rabbitmq.yaml
                         kubectl apply -f k8s/redis.yaml
+                        kubectl apply -f k8s/deployment.yaml
                         kubectl apply -f k8s/zulip.yaml
+                        
+                        echo "Waiting for Zulip pod to be ready..."
+                        kubectl rollout status deployment/zulipapp -n zulip
+                        
+                        echo "Services available:"
+                        kubectl get svc -n zulip
                     '''
                 }
             }
