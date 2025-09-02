@@ -180,11 +180,13 @@ spec:
   selector:
     app: zulip
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: 80
       targetPort: 80
       nodePort: 30080
-    - protocol: TCP
+    - name: https
+      protocol: TCP
       port: 443
       targetPort: 443
       nodePort: 30443
