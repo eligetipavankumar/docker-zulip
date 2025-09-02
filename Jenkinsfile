@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         REGISTRY = "docker.io"                // Docker Hub registry
-        IMAGE_NAME = "your-dockerhub-username/zulip"
-        IMAGE_TAG = "11.0"
+        IMAGE_NAME = "eligetipavankumar/zulipapp"
+        IMAGE_TAG = "latest"
         KUBECONFIG = "$HOME/.kube/config"     // Minikube kubeconfig
     }
 
@@ -12,7 +12,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/zulip/zulip.git'
+                    url: 'https://github.com/eligetipavankumar/docker-zulip.git'
             }
         }
 
@@ -26,7 +26,7 @@ pipeline {
 
         stage('Push to DockerHub') {
             steps {
-                withCredentials([usernamePassword(credentialsId: '	DOCKER_USER', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'DOCKER_USER', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
                         docker push $IMAGE_NAME:$IMAGE_TAG
