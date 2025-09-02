@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: zulip
-        image: your-dockerhub-username/zulip:11.0
+        image: eligetipavankumar/zulipapp:latest
         ports:
         - containerPort: 80
         - containerPort: 443
