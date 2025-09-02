@@ -1,0 +1,56 @@
+# k8s/postgres.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: zulip
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: zulip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: zulip/zulip-postgresql:14
+        env:
+        - name: POSTGRES_DB
+          value: zulip
+        - name: POSTGRES_USER
+          value: zulip
+        - name: POSTGRES_PASSWORD
+          value: "zulip-pass"
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: zulip
+spec:
+  ports:
+  - port: 5432
+  selector:
+    app: postgres
+

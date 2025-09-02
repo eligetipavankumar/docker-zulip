@@ -1,0 +1,32 @@
+# k8s/memcached.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: memcached
+  namespace: zulip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: memcached
+  template:
+    metadata:
+      labels:
+        app: memcached
+    spec:
+      containers:
+      - name: memcached
+        image: memcached:alpine
+        args: ["-m", "64", "-p", "11211"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: memcached
+  namespace: zulip
+spec:
+  ports:
+  - port: 11211
+  selector:
+    app: memcached
+

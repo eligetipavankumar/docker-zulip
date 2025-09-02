@@ -1,0 +1,42 @@
+# k8s/rabbitmq.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rabbitmq
+  namespace: zulip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      containers:
+      - name: rabbitmq
+        image: rabbitmq:4.0.7
+        env:
+        - name: RABBITMQ_DEFAULT_USER
+          value: zulip
+        - name: RABBITMQ_DEFAULT_PASS
+          value: "zulip-rabbit-pass"
+        volumeMounts:
+        - mountPath: /var/lib/rabbitmq
+          name: data
+      volumes:
+      - name: data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rabbitmq
+  namespace: zulip
+spec:
+  ports:
+  - port: 5672
+  selector:
+    app: rabbitmq
+
