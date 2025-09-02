@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zulip
+  namespace: zulip
+  labels:
+    app: zulip
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zulip
+  template:
+    metadata:
+      labels:
+        app: zulip
+    spec:
+      containers:
+        - name: zulip
+          image: your-dockerhub-username/zulip:11.0   # <-- change to your pushed image
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+          env:
+            - name: DB_HOST
+              value: postgres
+            - name: DB_HOST_PORT
+              value: "5432"
+            - name: DB_USER
+              value: zulip
+            - name: SECRETS_postgres_password
+              value: "zulip-pass"
+            - name: SETTING_MEMCACHED_LOCATION
+              value: memcached:11211
+            - name: SETTING_RABBITMQ_HOST
+              value: rabbitmq
+            - name: SECRETS_rabbitmq_password
+              value: "zulip-rabbit-pass"
+            - name: SETTING_REDIS_HOST
+              value: redis
+            - name: SECRETS_redis_password
+              value: "zulip-redis-pass"
+            - name: SECRETS_secret_key
+              value: "supersecretkey"
+            - name: SETTING_EXTERNAL_HOST
+              value: "zulip.local"
+            - name: SETTING_ZULIP_ADMINISTRATOR
+              value: "admin@example.com"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zulip
+  namespace: zulip
+  labels:
+    app: zulip
+spec:
+  type: NodePort   # so you can access it in Minikube
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 30080
+    - name: https
+      port: 443
+      targetPort: 443
+      nodePort: 30443
+  selector:
+    app: zulip
