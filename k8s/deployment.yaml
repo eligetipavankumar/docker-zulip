@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
         - name: zulip
-          image: your-dockerhub-username/zulip:11.0   # <-- change to your pushed image
+          image: eligetipavankumar/zulipapp:latest  # <-- change to your pushed image
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
             - containerPort: 443
