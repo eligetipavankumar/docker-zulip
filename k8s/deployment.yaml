@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: zulip
   namespace: zulip
-  labels:
-    app: zulip
 spec:
   replicas: 1
   selector:
@@ -17,28 +15,28 @@ spec:
     spec:
       containers:
         - name: zulip
-          image: eligetipavankumar/zulipapp:latest  # <-- change to your pushed image
+          image: eligetipavankumar/zulipapp:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
             - containerPort: 443
           env:
             - name: DB_HOST
-              value: postgres
+              value: "postgres"
             - name: DB_HOST_PORT
               value: "5432"
             - name: DB_USER
-              value: zulip
+              value: "zulip"
             - name: SECRETS_postgres_password
               value: "zulip-pass"
             - name: SETTING_MEMCACHED_LOCATION
-              value: memcached:11211
+              value: "memcached:11211"
             - name: SETTING_RABBITMQ_HOST
-              value: rabbitmq
+              value: "rabbitmq"
             - name: SECRETS_rabbitmq_password
               value: "zulip-rabbit-pass"
             - name: SETTING_REDIS_HOST
-              value: redis
+              value: "redis"
             - name: SECRETS_redis_password
               value: "zulip-redis-pass"
             - name: SECRETS_secret_key
@@ -53,18 +51,14 @@ kind: Service
 metadata:
   name: zulip
   namespace: zulip
-  labels:
-    app: zulip
 spec:
-  type: NodePort   # so you can access it in Minikube
-  ports:
-    - name: http
-      port: 80
-      targetPort: 80
-      nodePort: 30080
-    - name: https
-      port: 443
-      targetPort: 443
-      nodePort: 30443
   selector:
     app: zulip
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+    - protocol: TCP
+      port: 443
+      targetPort: 443
+  type: NodePort
