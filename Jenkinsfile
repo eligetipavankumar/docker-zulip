@@ -5,7 +5,7 @@ pipeline {
         REGISTRY = "docker.io"
         IMAGE_NAME = "eligetipavankumar/zulipapp"
         IMAGE_TAG = "latest"
-        KUBECONFIG = "C:/kube/config"   // safer path without spaces
+        KUBECONFIG = "C:/Users/elige/.kube/config"   // safer path without spaces
     }
 
     stages {
