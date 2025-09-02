@@ -1,10 +1,6 @@
-# This is a 2-stage Docker build.  In the first stage, we build a
-# Zulip development environment image and use
-# tools/build-release-tarball to generate a production release tarball
-# from the provided Git ref.
+# Stage 1: Base image
 FROM ubuntu:24.04 AS base
 
-# Set up working locales and upgrade the base image
 ENV LANG="C.UTF-8"
 
 ARG UBUNTU_MIRROR
@@ -17,6 +13,7 @@ RUN { [ ! "$UBUNTU_MIRROR" ] || sed -i "s|http://\(\w*\.\)*archive\.ubuntu\.com/
     touch /var/mail/ubuntu && chown ubuntu /var/mail/ubuntu && userdel -r ubuntu && \
     useradd -d /home/zulip -m zulip -u 1000
 
+# Stage 2: Build release tarball
 FROM base AS build
 
 RUN echo 'zulip ALL=(ALL:ALL) NOPASSWD:ALL' >> /etc/sudoers
@@ -24,8 +21,6 @@ RUN echo 'zulip ALL=(ALL:ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER zulip
 WORKDIR /home/zulip
 
-# You can specify these in docker-compose.yml or with
-#   docker build --build-arg "ZULIP_GIT_REF=git_branch_name" .
 ARG ZULIP_GIT_URL=https://github.com/zulip/zulip.git
 ARG ZULIP_GIT_REF=11.0
 
@@ -37,25 +32,23 @@ WORKDIR /home/zulip/zulip
 
 ARG CUSTOM_CA_CERTIFICATES
 
-# Finally, we provision the development environment and build a release tarball
+# Build production release tarball
 RUN SKIP_VENV_SHELL_WARNING=1 ./tools/provision --build-release-tarball-only && \
     uv run --no-sync ./tools/build-release-tarball docker && \
     mv /tmp/tmp.*/zulip-server-docker.tar.gz /tmp/zulip-server-docker.tar.gz
 
-
-# In the second stage, we build the production image from the release tarball
+# Stage 3: Production image
 FROM base
 
 ENV DATA_DIR="/data"
 
-# Then, with a second image, we install the production release tarball.
+# Install production release
 COPY --from=build /tmp/zulip-server-docker.tar.gz /root/
 COPY custom_zulip_files/ /root/custom_zulip
 
 ARG CUSTOM_CA_CERTIFICATES
 
 RUN \
-    # Make sure Nginx is started by Supervisor.
     dpkg-divert --add --rename /etc/init.d/nginx && \
     ln -s /bin/true /etc/init.d/nginx && \
     mkdir -p "$DATA_DIR" && \
@@ -72,12 +65,16 @@ RUN \
     apt-get -qq clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
+# Copy entrypoint & make executable
 COPY entrypoint.sh /sbin/entrypoint.sh
 RUN chmod +x /sbin/entrypoint.sh
+
+# Copy certbot hook
 COPY certbot-deploy-hook /sbin/certbot-deploy-hook
 
 VOLUME ["$DATA_DIR"]
 EXPOSE 25 80 443
 
+# Set entrypoint and default command
 ENTRYPOINT ["/sbin/entrypoint.sh"]
 CMD ["app:run"]
